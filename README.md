@@ -66,7 +66,7 @@ python setup.py install
 
 Our method is evaluated on two public datasets. You can download them from the official sources:
 
-M3ED Dataset: https://github.com/m3ed/m3ed
+M3ED Dataset: https://m3ed.io/data_overview
 
 MVSEC Dataset: https://daniilidis-group.github.io/mvsec/
 
@@ -76,6 +76,7 @@ We will provide our pre-processing scripts and specific split files soon.
 If you have any questions or find our work helpful, please contact us at:
 
 He Deng (Denghe2019@163.com)
+
 Yan Zhuang (zhuang@dlut.edu.cn)
 
 
