@@ -1,0 +1,3 @@
+# ninja log v7
+0	26893	1776827554964003321	/root/EVLoc/core/correlation_package/build/temp.linux-x86_64-cpython-311/correlation_cuda.o	137bd124f1cf08c3
+0	51576	1776827554968003446	/root/EVLoc/core/correlation_package/build/temp.linux-x86_64-cpython-311/correlation_cuda_kernel.o	38937fe1bef0c2bc
