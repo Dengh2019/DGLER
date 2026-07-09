@@ -2,8 +2,6 @@
 
 This repository is the official implementation of the paper "A Depth-Guided Feature Modulation Approach for Event-to-LiDAR Indoor Localization" (Submitted to IEEE Sensors Journal).
 
-The core code, pre-trained models and configuration files are currently being organized. This will be done within 7 days of paper submission.
-
 # Overview
 
 ## 1. Abstract
@@ -19,10 +17,14 @@ The core code, pre-trained models and configuration files are currently being or
 1. We have verified the environment configuration under `Python 3.11`, `PyTorch 2.2.1`, and `CUDA 12.1`. Follow the step-by-step instructions below to set up your environment.
 
  ```bash
-# 1. Upgrade pip and core tools
+# 1.Create and activate DGLER environment
+conda create -n DGLER python=3.11 -y
+conda activate DGLER
+
+# 2. Upgrade pip and core tools
 pip install --upgrade pip setuptools wheel
 
-# 2. Install core libraries (Python 3.11 compatible)
+# 3. Install core libraries (Python 3.11 compatible)
 pip install h5py==3.11.0 opencv-python==4.10.0.84 tqdm==4.66.4 matplotlib scikit-image pyyaml scipy open3d spconv-cu121
 ```
 2. Our framework contains three custom C++ operator packages. You need to compile and install them locally:
@@ -63,7 +65,7 @@ pip install pybind11 pybind11-stubgen
 python setup.py install
 ```
 
-# Dataset Preparation
+# Dataset & Data Preprocessing
 
 Our method is evaluated on two public datasets. You can download them from the official sources:
 
@@ -71,7 +73,30 @@ M3ED Dataset: https://m3ed.io/data_overview
 
 MVSEC Dataset: https://daniilidis-group.github.io/mvsec/
 
-We will provide our pre-processing scripts and specific split files soon.
+
+
+
+# Acknowledgement
+
+This codebase references the excellent open-source projects **[EVLoc](https://github.com/EasonChen99/EVLoc)** (ICRA 2025) and **[LEAR](https://github.com/EasonChen99/LEAR)** (ICRA 2026). We sincerely thank the authors for their inspiring work and for making their code publicly available.
+
+If you find this repository or our paper helpful, please also consider citing their works:
+
+```bibtex
+@inproceedings{chen2025evloc,
+  title={EVLoc: Event-based Visual Localization in LiDAR Maps via Event-Depth Registration},
+  author={Chen, Kuangyi and Zhang, Jun and Fraundorfer, Friedrich},
+  booktitle={IEEE International Conference on Robotics and Automation (ICRA)},
+  year={2025}
+}
+
+@article{chen2026lear,
+  title={LEAR: Learning Edge-Aware Representations for Event-to-LiDAR Localization},
+  author={Chen, Kuangyi and Zhang, Jun and Hu, Y and Zhou, Y and Fraundorfer, Friedrich},
+  journal={arXiv preprint arXiv:2603.01839},
+  year={2026}
+}
+```
 
 # Citation & Contact
 If you have any questions or find our work helpful, please contact us at:
