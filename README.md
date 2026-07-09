@@ -65,7 +65,7 @@ pip install pybind11 pybind11-stubgen
 python setup.py install
 ```
 
-# Dataset & Data Preprocessing
+# Datasets
 
 Our method is evaluated on two public datasets. You can download them from the official sources:
 
@@ -73,8 +73,49 @@ M3ED Dataset: https://m3ed.io/data_overview
 
 MVSEC Dataset: https://daniilidis-group.github.io/mvsec/
 
+# Pre-trained Models
 
+We provide the base pre-trained weights and the fine-tuned checkpoints for direct testing:
 
+1) Base Pre-trained Model (trained on falcon_indoor_flight sequences)
+   [Google Drive](Link) | [Baidu Netdisk](Link)
+
+2) Spot Indoor Building Loop Checkpoint (fine-tuned for 150 epochs)
+   [Google Drive](Link) | [Baidu Netdisk](Link)
+
+# Data Preprocessing
+
+## 1. Generate Event Voxel Grids
+Convert raw event streams into 5-channel spatio-temporal voxel grids. This needs to be run for both the left and right cameras:
+
+```bash
+# Process left camera events
+python tools/m3ed/event2frame.py --dataset <RAW_M3ED_DIR> --sequence <SEQUENCE_NAME> --save_dir <PROCESSED_DATA_DIR> --camera left --method voxel5 --time_window 100000
+
+# Process right camera events
+python tools/m3ed/event2frame.py --dataset <RAW_M3ED_DIR> --sequence <SEQUENCE_NAME> --save_dir <PROCESSED_DATA_DIR> --camera right --method voxel5 --time_window 100000
+```
+
+## 2. Project LiDAR Point Clouds
+Project 3D LiDAR point clouds into 2D depth maps:
+
+```bash
+python tools/m3ed/map2pc.py --dataset <RAW_M3ED_DIR> --sequence <SEQUENCE_NAME> --save_dir <PROCESSED_DATA_DIR>
+```
+
+# Training
+To train the network on a preprocessed sequence, run:
+
+```bash
+python main.py --data_path <PROCESSED_DATA_DIR> --test_sequence <SEQUENCE_NAME> --ev_input voxel5_pre_100000 --max_depth 10. --epochs 500 --batch_size 2 --lr 4e-5 --gpus 0 --max_r 5. --max_t 0.5 --evaluate_interval 1
+```
+
+# Evaluation
+To evaluate the localization performance using a pre-trained checkpoint, run:
+
+```bash
+python main.py --data_path <PROCESSED_DATA_DIR> --test_sequence <SEQUENCE_NAME> --ev_input voxel5_pre_100000 --max_r 5. --max_t 0.5 --load_checkpoints <PATH_TO_CHECKPOINT_FILE> -e
+```
 
 # Acknowledgement
 
