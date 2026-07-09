@@ -52,7 +52,7 @@ cd ../..
 
 3. Installing PoseLib
 
-The download link for PoseLib is: https://github.com/PoseLib/PoseLib
+  The download link for PoseLib is: https://github.com/PoseLib/PoseLib
 
 ```bash
 # 1. Install system dependencies (Eigen3 is required)
