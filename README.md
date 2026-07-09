@@ -128,17 +128,19 @@ This codebase references the excellent open-source projects **[EVLoc](https://gi
 If you find this repository or our paper helpful, please also consider citing their works:
 
 ```bibtex
-@inproceedings{chen2025evloc,
+@article{chen2025evloc,
   title={EVLoc: Event-based Visual Localization in LiDAR Maps via Event-Depth Registration},
   author={Chen, Kuangyi and Zhang, Jun and Fraundorfer, Friedrich},
   booktitle={IEEE International Conference on Robotics and Automation (ICRA)},
   year={2025}
 }
 
-@article{chen2026lear,
+@inproceedings{chen2026lear,
   title={LEAR: Learning Edge-Aware Representations for Event-to-LiDAR Localization},
   author={Chen, Kuangyi and Zhang, Jun and Hu, Y and Zhou, Y and Fraundorfer, Friedrich},
-  journal={arXiv preprint arXiv:2603.01839},
+  journal={arXiv preprint arXiv:2603.01839
+        
+        },
   year={2026}
 }
 ```
