@@ -12,19 +12,23 @@ This repository is the official implementation of the paper "A Depth-Guided Feat
 <img width="2376" height="1646" alt="摘要图片加了白色底色的" src="https://github.com/user-attachments/assets/ec669369-263c-4bda-8749-a573a3f6b77e" />
 
 
-# Environment & Installation
+## Environment & Installation
 
 1. We have verified the environment configuration under `Python 3.11`, `PyTorch 2.2.1`, and `CUDA 12.1`. Follow the step-by-step instructions below to set up your environment.
 
  ```bash
-# 1.Create and activate DGLER environment
+# 1. Clone the repository and enter the directory
+git clone https://github.com/Dengh2019/DGLER.git
+cd DGLER
+
+# 2.Create and activate DGLER environment
 conda create -n DGLER python=3.11 -y
 conda activate DGLER
 
-# 2. Upgrade pip and core tools
+# 3. Upgrade pip and core tools
 pip install --upgrade pip setuptools wheel
 
-# 3. Install core libraries (Python 3.11 compatible)
+# 4. Install core libraries (Python 3.11 compatible)
 pip install h5py==3.11.0 opencv-python==4.10.0.84 tqdm==4.66.4 matplotlib scikit-image pyyaml scipy open3d spconv-cu121
 ```
 2. Our framework contains three custom C++ operator packages. You need to compile and install them locally:
@@ -65,7 +69,7 @@ pip install pybind11 pybind11-stubgen
 python setup.py install
 ```
 
-# Datasets
+## Datasets
 
 Our method is evaluated on two public datasets. You can download them from the official sources:
 
@@ -73,7 +77,7 @@ M3ED Dataset: https://m3ed.io/data_overview
 
 MVSEC Dataset: https://daniilidis-group.github.io/mvsec/
 
-# Pre-trained Models
+## Pre-trained Models
 
 We provide the base pre-trained weights and the fine-tuned checkpoints for direct testing:
 
@@ -83,41 +87,41 @@ We provide the base pre-trained weights and the fine-tuned checkpoints for direc
 2) Spot Indoor Building Loop Checkpoint (fine-tuned for 150 epochs)
    [Google Drive](Link) | [Baidu Netdisk](Link)
 
-# Data Preprocessing
+## Data Preprocessing
 
-## 1. Generate Event Voxel Grids
+### 1. Generate Event Voxel Grids
 Convert raw event streams into 5-channel spatio-temporal voxel grids. This needs to be run for both the left and right cameras:
 
 ```bash
 # Process left camera events
-python tools/m3ed/event2frame.py --dataset <RAW_M3ED_DIR> --sequence <SEQUENCE_NAME> --save_dir <PROCESSED_DATA_DIR> --camera left --method voxel5 --time_window 100000
+python tools/m3ed/event2frame.py --dataset [RAW_M3ED_DIR] --sequence [SEQUENCE_NAME] --save_dir [PROCESSED_DATA_DIR] --camera left --method voxel5 --time_window 100000
 
 # Process right camera events
-python tools/m3ed/event2frame.py --dataset <RAW_M3ED_DIR> --sequence <SEQUENCE_NAME> --save_dir <PROCESSED_DATA_DIR> --camera right --method voxel5 --time_window 100000
+python tools/m3ed/event2frame.py --dataset [RAW_M3ED_DIR] --sequence [SEQUENCE_NAME] --save_dir [PROCESSED_DATA_DIR] --camera right --method voxel5 --time_window 100000
 ```
 
-## 2. Project LiDAR Point Clouds
+### 2. Project LiDAR Point Clouds
 Project 3D LiDAR point clouds into 2D depth maps:
 
 ```bash
-python tools/m3ed/map2pc.py --dataset <RAW_M3ED_DIR> --sequence <SEQUENCE_NAME> --save_dir <PROCESSED_DATA_DIR>
+python tools/m3ed/map2pc.py --dataset [RAW_M3ED_DIR] --sequence [SEQUENCE_NAME] --save_dir [PROCESSED_DATA_DIR]
 ```
 
-# Training
+## Training
 To train the network on a preprocessed sequence, run:
 
 ```bash
-python main.py --data_path <PROCESSED_DATA_DIR> --test_sequence <SEQUENCE_NAME> --ev_input voxel5_pre_100000 --max_depth 10. --epochs 500 --batch_size 2 --lr 4e-5 --gpus 0 --max_r 5. --max_t 0.5 --evaluate_interval 1
+python main.py --data_path [PROCESSED_DATA_DIR] --test_sequence [SEQUENCE_NAME] --ev_input voxel5_pre_100000 --max_depth 10. --epochs 500 --batch_size 2 --lr 4e-5 --gpus 0 --max_r 5. --max_t 0.5 --evaluate_interval 1
 ```
 
-# Evaluation
+## Evaluation
 To evaluate the localization performance using a pre-trained checkpoint, run:
 
 ```bash
-python main.py --data_path <PROCESSED_DATA_DIR> --test_sequence <SEQUENCE_NAME> --ev_input voxel5_pre_100000 --max_r 5. --max_t 0.5 --load_checkpoints <PATH_TO_CHECKPOINT_FILE> -e
+python main.py --data_path [PROCESSED_DATA_DIR] --test_sequence [SEQUENCE_NAME] --ev_input voxel5_pre_100000 --max_r 5. --max_t 0.5 --load_checkpoints [PATH_TO_CHECKPOINT_FILE] -e
 ```
 
-# Acknowledgement
+## Acknowledgement
 
 This codebase references the excellent open-source projects **[EVLoc](https://github.com/EasonChen99/EVLoc)** (ICRA 2025) and **[LEAR](https://github.com/EasonChen99/LEAR)** (ICRA 2026). We sincerely thank the authors for their inspiring work and for making their code publicly available.
 
@@ -139,7 +143,7 @@ If you find this repository or our paper helpful, please also consider citing th
 }
 ```
 
-# Citation & Contact
+## Citation & Contact
 If you have any questions or find our work helpful, please contact us at:
 
 He Deng (Denghe2019@163.com)
