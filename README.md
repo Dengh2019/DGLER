@@ -137,11 +137,7 @@ If you find this repository or our paper helpful, please also consider citing th
 @inproceedings{chen2026lear,
   title={LEAR: Learning Edge-Aware Representations for Event-to-LiDAR Localization},
   author={Chen, Kuangyi and Zhang, Jun and Hu, Y and Zhou, Y and Fraundorfer, Friedrich},
-  journal={arXiv preprint arXiv:2603.01839
-        
-        
-        
-        },
+  journal={arXiv preprint arXiv:2603.01839},
   year={2026}
 }
 ```
