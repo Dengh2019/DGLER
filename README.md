@@ -52,7 +52,7 @@ cd ../..
 
 3. Installing PoseLib
 
-  The download link for PoseLib is: **[PoseLib] https://github.com/PoseLib/PoseLib**
+  The download link for PoseLib is: **[PoseLib](https://github.com/PoseLib/PoseLib)**
 
 ```bash
 # 1. Install system dependencies (Eigen3 is required)
@@ -73,19 +73,18 @@ python setup.py install
 
 Our method is evaluated on two public datasets. You can download them from the official sources:
 
-M3ED Dataset: https://m3ed.io/data_overview
+M3ED Dataset: **[M3ED Dataset](https://m3ed.io/data_overview)**
 
-MVSEC Dataset: https://daniilidis-group.github.io/mvsec/
+MVSEC Dataset: **[MVSEC Dataset](https://daniilidis-group.github.io/mvsec/)**
 
 ## Pre-trained Models
 
-We provide the base pre-trained weights and the fine-tuned checkpoints for direct testing:
+We provide the base pre-trained weights and fine-tuned checkpoints (taking the spot_indoor_building_loop sequence as an example) for direct evaluation and testing:
 
-1) Base Pre-trained Model (trained on falcon_indoor_flight sequences)
-   [Google Drive](Link) | [Baidu Netdisk](Link)
-
-2) Spot Indoor Building Loop Checkpoint (fine-tuned for 150 epochs)
-   [Google Drive](Link) | [Baidu Netdisk](Link)
+* **Base Pre-trained Model** (trained on Falcon sequences)
+  * [Google Drive](https://drive.google.com/file/d/1CUhrpV_YEUWj50GIYVoBRdFqMe3Axmpp/view?usp=drive_link) 
+* **Spot Indoor Building Loop Checkpoint** (fine-tuned for 150 epochs)
+  * [Google Drive](https://drive.google.com/file/d/1Gxmvud4ZzGhH563-Tkbm2TEwj81YnH-r/view?usp=drive_link) 
 
 ## Data Preprocessing
 
@@ -139,6 +138,8 @@ If you find this repository or our paper helpful, please also consider citing th
   title={LEAR: Learning Edge-Aware Representations for Event-to-LiDAR Localization},
   author={Chen, Kuangyi and Zhang, Jun and Hu, Y and Zhou, Y and Fraundorfer, Friedrich},
   journal={arXiv preprint arXiv:2603.01839
+        
+        
         
         },
   year={2026}
