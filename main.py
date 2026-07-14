@@ -100,6 +100,16 @@ def train(args, TrainImgLoader, model, optimizer, scheduler, scaler, logger, dev
 
         logger.push(metrics) 
 
+def robust_normalize(tensor_map, clip_percentile=2.0):
+    """
+    """
+    arr = tensor_map.cpu().numpy() if torch.is_tensor(tensor_map) else tensor_map
+    # 
+    vmin = np.percentile(arr, clip_percentile)
+    vmax = np.percentile(arr, 100 - clip_percentile)
+    # 
+    arr_clipped = np.clip(arr, vmin, vmax)
+    return arr_clipped
 
 def test(args, TestImgLoader, model, device, cal_pose=False):
     global occlusion_threshold, occlusion_kernel
