@@ -110,7 +110,7 @@ python tools/m3ed/map2pc.py --dataset [RAW_M3ED_DIR] --sequence [SEQUENCE_NAME] 
 To train the network on a preprocessed sequence, run:
 
 ```bash
-python main.py --data_path [PROCESSED_DATA_DIR] --test_sequence [SEQUENCE_NAME] --ev_input voxel5_pre_100000 --max_depth 10. --epochs 500 --batch_size 2 --lr 4e-5 --gpus 0 --max_r 5. --max_t 0.5 --evaluate_interval 1
+python main.py --data_path [PROCESSED_DATA_DIR] --test_sequence [SEQUENCE_NAME] --ev_input voxel5_pre_100000 --max_depth 10. --epochs 300 --batch_size 2 --lr 4e-5 --gpus 0 --max_r 5. --max_t 0.5 --evaluate_interval 1
 ```
 
 ## Evaluation
@@ -137,7 +137,9 @@ If you find this repository or our paper helpful, please also consider citing th
 @inproceedings{chen2026lear,
   title={LEAR: Learning Edge-Aware Representations for Event-to-LiDAR Localization},
   author={Chen, Kuangyi and Zhang, Jun and Hu, Y and Zhou, Y and Fraundorfer, Friedrich},
-  journal={arXiv preprint arXiv:2603.01839},
+  journal={arXiv preprint arXiv:2603.01839
+        
+        },
   year={2026}
 }
 ```
