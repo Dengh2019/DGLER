@@ -107,11 +107,26 @@ python tools/m3ed/map2pc.py --dataset [RAW_M3ED_DIR] --sequence [SEQUENCE_NAME] 
 ```
 
 ## Training
-To train the network on a preprocessed sequence, run:
+
+Run the following commands from the repository root.
+
+### 1. Training from scratch
+
+To train the model from scratch for 300 epochs, run the following command.
 
 ```bash
-python main.py --data_path [PROCESSED_DATA_DIR] --test_sequence [SEQUENCE_NAME] --ev_input voxel5_pre_100000 --max_depth 10. --epochs 300 --batch_size 2 --lr 4e-5 --gpus 0 --max_r 5. --max_t 0.5 --evaluate_interval 1
+python main.py --data_path "[PROCESSED_DATA_DIR]" --test_sequence "[SEQUENCE_NAME]" --ev_input voxel5_pre_100000 --max_depth 10. --epochs 300 --batch_size 2 --lr 4e-5 --wdecay 1e-4 --gpus 0 --max_r 5. --max_t 0.5 --evaluate_interval 1
 ```
+
+### 2. Fine-tuning a pretrained model
+
+To load a pretrained checkpoint and fine-tune the model for 150 additional epochs, run the following command.
+
+```bash
+python main.py --data_path "[PROCESSED_DATA_DIR]" --test_sequence "[SEQUENCE_NAME]" --ev_input voxel5_pre_100000 --max_depth 10. --load_checkpoints "[PRETRAINED_CHECKPOINT_PATH]" --epochs 150 --starting_epoch 0 --batch_size 2 --lr 4e-5 --wdecay 1e-4 --gpus 0 --max_r 5. --max_t 0.5 --evaluate_interval 1
+```
+
+Replace the placeholders with your processed dataset directory, sequence name, and pretrained checkpoint path. Each training run saves the final-epoch model to `checkpoints/<timestamp>/checkpoint.pth` for subsequent evaluation.
 
 ## Evaluation
 To evaluate the localization performance using a pre-trained checkpoint, run:
