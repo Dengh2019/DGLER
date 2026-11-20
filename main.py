@@ -71,13 +71,15 @@ def train(args, TrainImgLoader, model, optimizer, scheduler, scaler, logger, dev
     
 
         data_generate = Data_preprocess(calib, occlusion_threshold, occlusion_kernel)
-        event_input, lidar_input, flow_gt = data_generate.push(event_frame, pc, T_err, R_err, device, MAX_DEPTH=args.max_depth, h=600, w=960)
+        #event_input, lidar_input, flow_gt = data_generate.push(event_frame, pc, T_err, R_err, device, MAX_DEPTH=args.max_depth, h=600, w=960)
+        event_input, lidar_input, flow_gt, depth_ref, flow_valid = data_generate.push(event_frame, pc, T_err, R_err, device,MAX_DEPTH=args.max_depth, h=600, w=960)
         
         # =============== Data cleaning  ===============
         # Force all NaN and Inf values resulting from Z->0 to be replaced with 0.0
         event_input = torch.nan_to_num(event_input, nan=0.0, posinf=0.0, neginf=0.0)
         lidar_input = torch.nan_to_num(lidar_input, nan=0.0, posinf=0.0, neginf=0.0)
         flow_gt = torch.nan_to_num(flow_gt, nan=0.0, posinf=0.0, neginf=0.0)
+        depth_ref = torch.nan_to_num(depth_ref, nan=0.0, posinf=0.0, neginf=0.0)
         # ==============================================================================
          
         optimizer.zero_grad()
@@ -87,7 +89,18 @@ def train(args, TrainImgLoader, model, optimizer, scheduler, scaler, logger, dev
         
         #loss, metrics = sequence_loss(flow_preds, flow_gt, args.gamma, MAX_FLOW=400)
         # Pass in the depth map to calculate the depth perception loss
-        loss, metrics = sequence_loss(flow_preds, flow_gt, depth_map=lidar_input, gamma=args.gamma, MAX_FLOW=400)
+        #loss, metrics = sequence_loss(flow_preds, flow_gt, depth_map=lidar_input, gamma=args.gamma, MAX_FLOW=400)
+        loss, metrics = sequence_loss(
+            flow_preds, flow_gt,
+            depth_map=lidar_input,
+            depth_ref=depth_ref,
+            flow_valid=flow_valid,
+            gamma=args.gamma,
+            MAX_FLOW=400,
+            alpha=5.0,
+            eps=1e-6,
+            eps_g=1e-5
+        )
 
         scaler.scale(loss).backward()
         scaler.unscale_(optimizer)
@@ -162,12 +175,17 @@ def test(args, TestImgLoader, model, device, cal_pose=False):
         R_err = sample['rot_error']
 
         data_generate = Data_preprocess(calib, occlusion_threshold, occlusion_kernel)
-        event_input, lidar_input, flow_gt = data_generate.push(event_frame, pc, T_err, R_err, device, MAX_DEPTH=args.max_depth, split='test', h=600, w=960)
+        #event_input, lidar_input, flow_gt = data_generate.push(event_frame, pc, T_err, R_err, device, MAX_DEPTH=args.max_depth, split='test', h=600, w=960)
+        event_input, lidar_input, flow_gt, _, _ = data_generate.push(
+            event_frame, pc, T_err, R_err, device,
+            MAX_DEPTH=args.max_depth, split='test', h=600, w=960
+        )
 
         # Data cleaning, eliminating NaN values
         event_input = torch.nan_to_num(event_input, nan=0.0, posinf=0.0, neginf=0.0)
         lidar_input = torch.nan_to_num(lidar_input, nan=0.0, posinf=0.0, neginf=0.0)
         flow_gt = torch.nan_to_num(flow_gt, nan=0.0, posinf=0.0, neginf=0.0)
+        
 
         end = time.time()
         
@@ -312,20 +330,21 @@ def test(args, TestImgLoader, model, device, cal_pose=False):
     # 4. Draw a line chart of the globally compliant error distribution (separated into two independent graphs, without titles, dpi = 600)
     # ==========================================================
     if cal_pose and len(err_t_list) > 0:
-        plot_err_r = np.minimum(np.array(err_r_list), np.array(init_err_r_list))
-        plot_err_t = np.minimum(np.array(err_t_list), np.array(init_err_t_list))
-        
-        def moving_average(data, window_size=3):
-            return np.convolve(data, np.ones(window_size)/window_size, mode='same')
-            
-        plot_err_r_smooth = moving_average(plot_err_r)
-        plot_err_t_smooth = moving_average(plot_err_t)
+        #plot_err_r = np.minimum(np.array(err_r_list), np.array(init_err_r_list))
+        #plot_err_t = np.minimum(np.array(err_t_list), np.array(init_err_t_list))
+        #def moving_average(data, window_size=3):
+            #return np.convolve(data, np.ones(window_size)/window_size, mode='same')   
+        #plot_err_r_smooth = moving_average(plot_err_r)
+        #plot_err_t_smooth = moving_average(plot_err_t)
+        plot_err_r = np.asarray(err_r_list)
+        plot_err_t = np.asarray(err_t_list)
         indices = np.arange(len(err_r_list))
 
         # --- Rotation error figure ---
         fig_r, ax_r = plt.subplots(figsize=(10, 6), facecolor='white')
         ax_r.plot(indices, init_err_r_list, color='blue', linestyle='-', linewidth=1.2, label='Error of the initial poses')
-        ax_r.plot(indices, plot_err_r_smooth, color='red', linestyle='--', linewidth=1.5, label='Error of the refined poses using ours')
+        #ax_r.plot(indices, plot_err_r_smooth, color='red', linestyle='--', linewidth=1.5, label='Error of the refined poses using ours')
+        ax_r.plot(indices, plot_err_r, color='red', linestyle='--', linewidth=1.5, label='Error of the refined poses using ours')
         ax_r.set_xlabel('Index', fontsize=16)
         ax_r.set_ylabel('Rotation Error (deg)', fontsize=16)
         # remove title
@@ -339,7 +358,8 @@ def test(args, TestImgLoader, model, device, cal_pose=False):
         # --- Translation Error figure ---
         fig_t, ax_t = plt.subplots(figsize=(10, 6), facecolor='white')
         ax_t.plot(indices, init_err_t_list, color='blue', linestyle='-', linewidth=1.2, label='Error of the initial poses')
-        ax_t.plot(indices, plot_err_t_smooth, color='red', linestyle='--', linewidth=1.5, label='Error of the refined poses using ours')
+        #ax_t.plot(indices, plot_err_t_smooth, color='red', linestyle='--', linewidth=1.5, label='Error of the refined poses using ours')
+        ax_t.plot(indices, plot_err_t, color='red', linestyle='--', linewidth=1.5, label='Error of the refined poses using ours')
         ax_t.set_xlabel('Index', fontsize=16)
         ax_t.set_ylabel('Translation Error (cm)', fontsize=16)
         # remove title
@@ -401,7 +421,7 @@ if __name__ == '__main__':
                         help='initial learning rate')
     parser.add_argument('--wdecay', 
                         type=float, 
-                        default=.00005)
+                        default=1e-4)
     parser.add_argument('--epsilon', 
                         type=float, 
                         default=1e-8)
@@ -510,8 +530,9 @@ if __name__ == '__main__':
     logger = Logger(model, scheduler, SUM_FREQ=100)
 
     datetime = time.strftime('%Y-%m-%d-%H-%M-%S',time.localtime(time.time()))
-    if not os.path.exists(f'./checkpoints/{datetime}'):
-        os.mkdir(f'./checkpoints/{datetime}')
+    os.makedirs(f'./checkpoints/{datetime}', exist_ok=True)
+    #if not os.path.exists(f'./checkpoints/{datetime}'):
+        #os.mkdir(f'./checkpoints/{datetime}')
 
     starting_epoch = args.starting_epoch
     if starting_epoch > 0:
@@ -522,7 +543,7 @@ if __name__ == '__main__':
             scaler.update()
         logger.total_steps = starting_epoch * len(TrainImgLoader)
 
-    min_val_err = 9999.
+    #min_val_err = 9999.
     # Record the start time outside the loop
     start_time = time.time()
     for epoch in range(starting_epoch, args.epochs):
@@ -534,18 +555,6 @@ if __name__ == '__main__':
         train(args, TrainImgLoader, model, optimizer, scheduler, scaler, logger, device, epoch)
 
         torch.cuda.empty_cache()
+    
+    torch.save(model.state_dict(), f"./checkpoints/{datetime}/checkpoint.pth")
 
-        if epoch % args.evaluate_interval == 0:
-            epe, f1 = test(args, TestImgLoader, model, device)
-            print("Validation M3ED: %f, %f" % (epe, f1))
-
-            results = {'m3ed-epe': epe, 'm3ed-f1': f1}
-            logger.write_dict(results)
-
-            torch.save(model.state_dict(), f"./checkpoints/{datetime}/checkpoint.pth")
-
-            if epe < min_val_err:
-                min_val_err = epe
-                torch.save(model.state_dict(), f'./checkpoints/{datetime}/best_model.pth')
-             # Force clearing of memory fragmentation
-            torch.cuda.empty_cache()
