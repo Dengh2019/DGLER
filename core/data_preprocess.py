@@ -86,7 +86,7 @@ class Data_preprocess:
         project_delta_P[1, :, :] = project_delta_P_2
 
         return project_delta_P
-
+    """
     def DownsampleCrop_M3ED_delta(self, img, depth, displacement, split, h=600, w=960):
         if split == 'train':
             x = np.random.randint(0, img.shape[1] - h)
@@ -98,7 +98,24 @@ class Data_preprocess:
         depth = depth[:, x:x + h, y:y + w]
         displacement = displacement[:, x:x + h, y:y + w]
         return img, depth, displacement
-    
+    """
+    def DownsampleCrop_M3ED_delta(self, img, depth, displacement,
+                                 depth_ref, flow_valid, split, h=600, w=960):
+        if split == 'train':
+            x = np.random.randint(0, img.shape[1] - h)
+            y = np.random.randint(0, img.shape[2] - w)
+        else:
+            x = (img.shape[1] - h) // 2
+            y = (img.shape[2] - w) // 2
+
+        img = img[:, x:x + h, y:y + w]
+        depth = depth[:, x:x + h, y:y + w]
+        displacement = displacement[:, x:x + h, y:y + w]
+        depth_ref = depth_ref[:, x:x + h, y:y + w]
+        flow_valid = flow_valid[:, x:x + h, y:y + w]
+
+        return img, depth, displacement, depth_ref, flow_valid
+
     def DownsampleCrop_input(self, img, depth, split, h=600, w=960):
         if split == 'train':
             x = np.random.randint(0, img.shape[1] - h)
@@ -122,6 +139,8 @@ class Data_preprocess:
         lidar_input = []
         rgb_input = []
         flow_gt = []
+        depth_ref_batch = []
+        flow_valid_batch = []
 
         for idx in range(len(rgbs)):
             rgb = rgbs[idx].to(device)
@@ -176,27 +195,44 @@ class Data_preprocess:
                 self.gen_depth_img(uv_RT, depth_RT, VI_indexes_RT[VI_indexes_RT], cam_params)
 
             depth_img_no_occlusion_RT_training /= MAX_DEPTH
-
             depth_img_no_occlusion_RT_training = depth_img_no_occlusion_RT_training.unsqueeze(0)
+
+            ref_point_ids = torch.arange(1, uv.shape[0] + 1, device=device)
+            depth_ref, _ = self.gen_depth_img(
+                uv, depth, ref_point_ids, cam_params
+            )
+            depth_ref = (depth_ref / MAX_DEPTH).unsqueeze(0)
 
             mask1 = indexes_uv_fresh > 0
             mask2 = indexes_uvRT_fresh > 0
             mask = mask1 & mask2
             project_delta_P = self.delta_2(delta_P, uv_RT_af_index, mask)
 
-            ## downsample and crop
-            rgb, depth_img_no_occlusion_RT_training, project_delta_P \
-                = self.DownsampleCrop_M3ED_delta(rgb, depth_img_no_occlusion_RT_training, project_delta_P, split, h=h, w=w)
+            flow_valid = torch.zeros_like(
+                depth_img_no_occlusion_RT_training, dtype=torch.bool
+            )
+            valid_uv = uv_RT_af_index[mask].long()
+            flow_valid[0, valid_uv[:, 1], valid_uv[:, 0]] = True
+
+            rgb, depth_img_no_occlusion_RT_training, project_delta_P, depth_ref, flow_valid = \
+                self.DownsampleCrop_M3ED_delta(
+                    rgb, depth_img_no_occlusion_RT_training, project_delta_P,
+                    depth_ref, flow_valid, split, h=h, w=w
+                )
 
             rgb_input.append(rgb)
             lidar_input.append(depth_img_no_occlusion_RT_training)
             flow_gt.append(project_delta_P)
+            depth_ref_batch.append(depth_ref)
+            flow_valid_batch.append(flow_valid)
 
         lidar_input = torch.stack(lidar_input)
         rgb_input = torch.stack(rgb_input)
         flow_gt = torch.stack(flow_gt)
+        depth_ref_batch = torch.stack(depth_ref_batch)
+        flow_valid_batch = torch.stack(flow_valid_batch)
 
-        return rgb_input, lidar_input, flow_gt
+        return rgb_input, lidar_input, flow_gt, depth_ref_batch, flow_valid_batch
     
 
     def push_input(self, rgbs, pcs, T_errs, R_errs, device, MAX_DEPTH=10., h=600, w=960, split='train'):
