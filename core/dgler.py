@@ -12,7 +12,8 @@ class SFT_Layer(nn.Module):
         self.conv_gamma = nn.Sequential(
             nn.Conv2d(depth_channels, depth_channels, 3, padding=1),
             nn.LeakyReLU(0.1, True),
-            nn.Conv2d(depth_channels, event_channels, 3, padding=1)
+            nn.Conv2d(depth_channels, event_channels, 3, padding=1),
+            nn.Sigmoid()
         )
         self.conv_beta = nn.Sequential(
             nn.Conv2d(depth_channels, depth_channels, 3, padding=1),
