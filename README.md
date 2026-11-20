@@ -120,7 +120,7 @@ python main.py --data_path "[PROCESSED_DATA_DIR]" --test_sequence "[SEQUENCE_NAM
 
 ### 2. Fine-tuning a pretrained model
 
-To load a pretrained checkpoint and fine-tune the model for 150 additional epochs, run the following command.
+To load a model pretrained for 150 epochs on falcon_indoor_flight_1 and falcon_indoor_flight_2 and fine-tune it for an additional 150 epochs, run the following command.
 
 ```bash
 python main.py --data_path "[PROCESSED_DATA_DIR]" --test_sequence "[SEQUENCE_NAME]" --ev_input voxel5_pre_100000 --max_depth 10. --load_checkpoints "[PRETRAINED_CHECKPOINT_PATH]" --epochs 150 --starting_epoch 0 --batch_size 2 --lr 4e-5 --wdecay 1e-4 --gpus 0 --max_r 5. --max_t 0.5 --evaluate_interval 1
