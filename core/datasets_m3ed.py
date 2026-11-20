@@ -194,7 +194,7 @@ class DatasetM3ED(Dataset):
                     rotx = np.random.uniform(-max_r, max_r) * (3.141592 / 180.0)
                     transl_x = np.random.uniform(-max_t, max_t)
                     transl_y = np.random.uniform(-max_t, max_t)
-                    transl_z = np.random.uniform(-min(max_t, 0.1), min(max_t, 0.1))
+                    transl_z = np.random.uniform(-min(max_t, max_t), min(max_t, max_t))
                     test_RT_writer.writerow([i, transl_x, transl_y, transl_z, rotx, roty, rotz])
                     self.test_RT.append([i, transl_x, transl_y, transl_z, rotx, roty, rotz])
                 test_RT_file_out.close()
@@ -245,7 +245,7 @@ class DatasetM3ED(Dataset):
             R = mathutils.Euler((0, 0, radians(img_rotation)), 'XYZ')
             T = mathutils.Vector((0., 0., 0.))
             pc_in = rotate_forward(pc_in, R, T)
-
+        """
         # ================= Voxel Loading and Enhancement Module=================
         event_frame = np.load(event_frame_path)
         event_time_frame = torch.tensor(event_frame).float()
@@ -261,9 +261,9 @@ class DatasetM3ED(Dataset):
             
         event_frame = event_time_frame
         # =================================================================
-
         """
-        # =================Ablation experiment =================
+        
+        # =================STDF-----&&Ablation experiment  =================
         event_frame = np.load(event_frame_path)
         event_time_frame = torch.tensor(event_frame).float() # Shape: [5, H, W]
         
@@ -271,11 +271,11 @@ class DatasetM3ED(Dataset):
         # (Spatio-Temporal Density Filtering)
         # -------------------------------------------------------------
         # 1. Extract binary mask.
-        binary_mask = (event_time_frame > 0).float()
+        #binary_mask = (event_time_frame > 0).float()
         
         # 2. Calculate the global spatial density distribution [1, H, W]
-        spatial_density = torch.sum(binary_mask, dim=0, keepdim=True)
-        
+        #spatial_density = torch.sum(binary_mask, dim=0, keepdim=True)
+        spatial_density = (event_time_frame.abs().sum(dim=0, keepdim=True) > 0).float()
         # 3. Use a 5x5 mean pooling kernel to calculate the event density within the local neighborhood.
         # padding=2 Ensure that the output size remains unchanged.
         local_event_count = torch.nn.functional.avg_pool2d(
@@ -296,7 +296,7 @@ class DatasetM3ED(Dataset):
         # Normalization
         max_val = torch.max(event_time_frame)
         if max_val > 0:
-            event_time_frame /= max_val
+            event_time_frame /= (max_val + 1e-6)
             
         # Data augmentation
         if h_mirror:
@@ -307,7 +307,7 @@ class DatasetM3ED(Dataset):
             
         event_frame = event_time_frame
         # =================================================================
-        """
+        
 
 
         
@@ -318,7 +318,7 @@ class DatasetM3ED(Dataset):
             rotx = np.random.uniform(-max_angle, max_angle) * (3.141592 / 180.0)
             transl_x = np.random.uniform(-self.max_t, self.max_t)
             transl_y = np.random.uniform(-self.max_t, self.max_t)
-            transl_z = np.random.uniform(-min(self.max_t, 0.1), min(self.max_t, 0.1))
+            transl_z = np.random.uniform(-min(self.max_t, self.max_t), min(self.max_t, self.max_t))
         else:
             initial_RT = self.test_RT[idx]
             rotz = initial_RT[6]
